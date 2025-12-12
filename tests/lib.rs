@@ -1,4 +1,4 @@
-#![allow(unused_variables, unused_imports, dead_code, deprecated)]
+#![allow(unused_variables, unused_imports, dead_code)]
 
 use chrono::prelude::*;
 use m3u8_rs::QuotedOrUnquoted::Quoted;
@@ -17,7 +17,7 @@ fn all_sample_m3u_playlists() -> Vec<path::PathBuf> {
         .unwrap()
         .filter_map(Result::ok)
         .map(|dir| dir.path())
-        .filter(|path| path.extension().is_some_and(|ext| ext == "m3u8"))
+        .filter(|path| path.extension().map_or(false, |ext| ext == "m3u8"))
         .collect()
 }
 
@@ -188,21 +188,6 @@ fn print_create_and_parse_playlist(playlist_original: &mut Playlist) -> Playlist
     print!("\n\n---- Parsed\n\n{:?}\n\n", playlist_parsed);
 
     playlist_parsed
-}
-
-fn print_parse_and_create_playlist(playlist_original: &str) -> String {
-    let (_, playlist_parsed) = parse_playlist(playlist_original.as_bytes()).unwrap();
-
-    let mut utf8: Vec<u8> = Vec::new();
-    playlist_parsed.write_to(&mut utf8).unwrap();
-
-    let m3u8_str: &str = std::str::from_utf8(&utf8).unwrap();
-
-    print!("\n\n---- utf8 result\n\n{}", m3u8_str);
-    print!("\n---- Original\n\n{:?}", playlist_original);
-    print!("\n\n---- Parsed\n\n{:?}\n\n", playlist_parsed);
-
-    m3u8_str.to_string()
 }
 
 #[test]
@@ -404,7 +389,6 @@ fn create_and_parse_media_playlist_full() {
                 other_attributes: Default::default(),
             }),
             program_date_time: Some(
-                #[allow(deprecated)]
                 chrono::FixedOffset::east(8 * 3600)
                     .ymd(2010, 2, 19)
                     .and_hms_milli(14, 54, 23, 31),

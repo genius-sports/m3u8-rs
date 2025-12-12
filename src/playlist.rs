@@ -167,7 +167,6 @@ macro_rules! quoted_string_parse {
 /// lines in the Playlist identify Media Playlists.  A Playlist MUST be
 /// either a Media Playlist or a Master Playlist; all other Playlists are invalid.
 #[derive(Debug, PartialEq, Clone)]
-#[allow(clippy::large_enum_variant)]
 pub enum Playlist {
     MasterPlaylist(MasterPlaylist),
     MediaPlaylist(MediaPlaylist),
@@ -559,10 +558,9 @@ impl AlternativeMedia {
     }
 }
 
-#[derive(Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub enum AlternativeMediaType {
     Audio,
-    #[default]
     Video,
     Subtitles,
     ClosedCaptions,
@@ -580,6 +578,12 @@ impl FromStr for AlternativeMediaType {
             "CLOSED-CAPTIONS" => Ok(AlternativeMediaType::ClosedCaptions),
             _ => Ok(AlternativeMediaType::Other(String::from(s))),
         }
+    }
+}
+
+impl Default for AlternativeMediaType {
+    fn default() -> AlternativeMediaType {
+        AlternativeMediaType::Video
     }
 }
 
@@ -828,9 +832,8 @@ impl MediaPlaylist {
 }
 
 /// [`#EXT-X-PLAYLIST-TYPE:<EVENT|VOD>`](https://tools.ietf.org/html/draft-pantos-http-live-streaming-19#section-4.3.3.5)
-#[derive(Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub enum MediaPlaylistType {
-    #[default]
     Event,
     Vod,
     Other(String),
@@ -900,6 +903,11 @@ impl MediaSegment {
     }
 
     pub(crate) fn write_to<T: Write>(&self, w: &mut T) -> std::io::Result<()> {
+        if let Some(ref map) = self.map {
+            write!(w, "#EXT-X-MAP:")?;
+            map.write_attributes_to(w)?;
+            writeln!(w)?;
+        }
         if let Some(ref byte_range) = self.byte_range {
             write!(w, "#EXT-X-BYTERANGE:")?;
             byte_range.write_value_to(w)?;
@@ -911,11 +919,6 @@ impl MediaSegment {
         for key in &self.keys {
             write!(w, "#EXT-X-KEY:")?;
             key.write_attributes_to(w)?;
-            writeln!(w)?;
-        }
-        if let Some(ref map) = self.map {
-            write!(w, "#EXT-X-MAP:")?;
-            map.write_attributes_to(w)?;
             writeln!(w)?;
         }
         if let Some(ref v) = self.program_date_time {
@@ -953,19 +956,22 @@ impl MediaSegment {
             writeln!(w)?;
         }
 
-        writeln!(w, "{}", self.uri)?;
-
-        Ok(())
+        writeln!(w, "{}", self.uri)
     }
 }
 
-#[derive(Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub enum KeyMethod {
-    #[default]
     None,
     AES128,
     SampleAES,
     Other(String),
+}
+
+impl Default for KeyMethod {
+    fn default() -> Self {
+        KeyMethod::None
+    }
 }
 
 impl FromStr for KeyMethod {
@@ -1202,8 +1208,8 @@ impl DateRange {
             ",END-DATE",
             &self.end_date.as_ref().map(|dt| dt.to_rfc3339())
         )?;
-        write_some_float_attribute!(w, ",DURATION", &self.duration)?;
-        write_some_float_attribute!(w, ",PLANNED-DURATION", &self.planned_duration)?;
+        write_some_attribute!(w, ",DURATION", &self.duration)?;
+        write_some_attribute!(w, ",PLANNED-DURATION", &self.planned_duration)?;
         if let Some(x_prefixed) = &self.x_prefixed {
             for (name, attr) in x_prefixed {
                 write!(w, ",{}={}", name, attr)?;
