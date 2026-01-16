@@ -1349,7 +1349,7 @@ impl PartInf {
 #[derive(Debug, Default, PartialEq, Clone)]
 pub struct Part {
     pub uri: String,
-    pub duration: f64,
+    pub duration: f32,
     pub independent: bool,
     pub gap: bool,
     pub byte_range: Option<ByteRange>,
@@ -1362,7 +1362,7 @@ impl Part {
         let uri = quoted_string!(attrs, "URI")
             .ok_or_else(|| String::from("EXT-X-PART without mandatory URI attribute"))?;
         let duration = unquoted_string_parse!(attrs, "DURATION", |s: &str| s
-            .parse::<f64>()
+            .parse::<f32>()
             .map_err(|err| format!("Failed to parse DURATION attribute: {}", err)))
         .ok_or_else(|| String::from("EXT-X-PART without mandatory DURATION attribute"))?;
         let independent = is_yes!(attrs, "INDEPENDENT");
