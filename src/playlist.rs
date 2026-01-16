@@ -1230,10 +1230,10 @@ impl DateRange {
 // Implementing structs for LL-HLS
 #[derive(Debug, Default, PartialEq, Clone)]
 pub struct ServerControl {
-    pub can_skip_until: Option<f64>,
+    pub can_skip_until: Option<f32>,
     pub can_skip_dateranges: bool,
-    pub hold_back: Option<f64>,
-    pub part_hold_back: Option<f64>,
+    pub hold_back: Option<f32>,
+    pub part_hold_back: Option<f32>,
     pub can_block_reload: bool,
 }
 
@@ -1242,7 +1242,7 @@ impl ServerControl {
         mut attrs: HashMap<String, QuotedOrUnquoted>,
     ) -> Result<ServerControl, String> {
         let can_skip_until = unquoted_string_parse!(attrs, "CAN-SKIP-UNTIL", |s: &str| s
-            .parse::<f64>()
+            .parse::<f32>()
             .map_err(|err| format!("Failed to parse CAN-SKIP-UNTIL attribute: {}", err)));
         let can_skip_dateranges = is_yes!(attrs, "CAN-SKIP-DATERANGES");
         if can_skip_dateranges && can_skip_until.is_none() {
@@ -1251,10 +1251,10 @@ impl ServerControl {
             ));
         }
         let hold_back = unquoted_string_parse!(attrs, "HOLD-BACK", |s: &str| s
-            .parse::<f64>()
+            .parse::<f32>()
             .map_err(|err| format!("Failed to parse HOLD-BACK attribute: {}", err)));
         let part_hold_back = unquoted_string_parse!(attrs, "PART-HOLD-BACK", |s: &str| s
-            .parse::<f64>()
+            .parse::<f32>()
             .map_err(|err| format!("Failed to parse PART-HOLD-BACK attribute: {}", err)));
         let can_block_reload = is_yes!(attrs, "CAN-BLOCK-RELOAD");
 
@@ -1317,7 +1317,7 @@ impl ServerControl {
 
 #[derive(Debug, Default, PartialEq, Clone)]
 pub struct PartInf {
-    pub part_target: f64,
+    pub part_target: f32,
 }
 
 impl PartInf {
@@ -1325,7 +1325,7 @@ impl PartInf {
         mut attrs: HashMap<String, QuotedOrUnquoted>,
     ) -> Result<PartInf, String> {
         let part_target = unquoted_string_parse!(attrs, "PART-TARGET", |s: &str| s
-            .parse::<f64>()
+            .parse::<f32>()
             .map_err(|err| format!("Failed to parse PART-TARGET attribute: {}", err)))
         .ok_or_else(|| String::from("EXT-X-PART-INF without mandatory PART-TARGET attribute"))?;
 
