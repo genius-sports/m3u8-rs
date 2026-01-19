@@ -450,7 +450,7 @@ fn media_playlist_from_tags(mut tags: Vec<MediaPlaylistTag>) -> MediaPlaylist {
                 media_playlist.preload_hint = Some(p);
             }
             MediaPlaylistTag::RenditionReport(r) => {
-                media_playlist.rendition_report = Some(r);
+                media_playlist.rendition_reports.push(r);
             }
             MediaPlaylistTag::Segment(segment_tag) => match segment_tag {
                 SegmentTag::Extinf(d, t) => {

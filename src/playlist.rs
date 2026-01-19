@@ -760,7 +760,7 @@ pub struct MediaPlaylist {
     pub part_inf: Option<PartInf>,
     pub skip: Option<Skip>,
     pub preload_hint: Option<PreloadHint>,
-    pub rendition_report: Option<RenditionReport>,
+    pub rendition_reports: Vec<RenditionReport>,
     pub parts: Vec<Part>,
 }
 
@@ -823,7 +823,7 @@ impl MediaPlaylist {
             preload_hint.write_to(w)?;
         }
 
-        if let Some(ref rendition_report) = self.rendition_report {
+        for rendition_report in &self.rendition_reports {
             rendition_report.write_to(w)?;
         }
 
