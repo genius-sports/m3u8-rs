@@ -889,7 +889,7 @@ pub struct MediaSegment {
     /// `#EXT-X-PROGRAM-DATE-TIME:<YYYY-MM-DDThh:mm:ssZ>`
     pub program_date_time: Option<chrono::DateTime<chrono::FixedOffset>>,
     /// `#EXT-X-DATERANGE:<attribute-list>`
-    pub daterange: Option<DateRange>,
+    pub daterange: Vec<DateRange>,
     /// `#EXT-`
     pub unknown_tags: Vec<ExtTag>,
 
@@ -928,9 +928,9 @@ impl MediaSegment {
                 v.to_rfc3339_opts(chrono::SecondsFormat::Millis, true)
             )?;
         }
-        if let Some(ref v) = self.daterange {
+        for daterange in &self.daterange {
             write!(w, "#EXT-X-DATERANGE:")?;
-            v.write_attributes_to(w)?;
+            daterange.write_attributes_to(w)?;
             writeln!(w)?;
         }
         for unknown_tag in &self.unknown_tags {
